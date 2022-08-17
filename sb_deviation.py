@@ -1,5 +1,6 @@
 import re
 import sys
+import math
 from statistics import mean, stdev
 # import numpy as np
 
@@ -13,12 +14,13 @@ pattern = re.compile(r'\[.*] thds: \d+ tps: (\d+\.?\d*) qps: (\d+\.?\d*) \(r/w/o
 
 ## numpy version
 # result = np.array(pattern.findall(sb_content), dtype='float')
+# count = np.size(result, 0)
 
 # def stat(nums, name):
-#     print("[{:^3}] avg: {:<10.2f}std_deviation: {:<10.2f}max-min: {:<10.2f}".format(
-#         name, np.average(nums), np.std(nums), np.max(nums) - np.min(nums)));
+#     print("[{:^3}] avg: {:<10.2f}std_err(SE): {:<10.2f}std_dev(SD): {:<10.2f}max-min: {:<10.2f}".format(
+#         name, np.average(nums), np.std(nums) / np.sqrt(count), np.std(nums), np.max(nums) - np.min(nums)));
 
-# print("Total Records:", np.size(result, 0))
+# print("Total Records:", count)
 # stat(result[:, 0], "tps")
 # stat(result[:, 1], "qps")
 # stat(result[:, 5], "lat")
@@ -28,12 +30,13 @@ pattern = re.compile(r'\[.*] thds: \d+ tps: (\d+\.?\d*) qps: (\d+\.?\d*) \(r/w/o
 
 # statistics version
 result = pattern.findall(sb_content)
+count = len(result)
 
 def stat(nums, name):
-    print("[{:^3}] avg: {:<10.2f}std_deviation: {:<10.2f}max-min: {:<10.2f}".format(
-        name, mean(nums), stdev(nums), max(nums) - min(nums)));
+    print("[{:^3}] avg: {:<10.2f}std_err(SE): {:<10.2f}std_dev(SD): {:<10.2f}max-min: {:<10.2f}".format(
+        name, mean(nums), stdev(nums) / math.sqrt(count), stdev(nums), max(nums) - min(nums)));
 
-print("Total Records:", len(result))
+print("Total Records:", count)
 stat([float(x[0]) for x in result] , "tps")
 stat([float(x[1]) for x in result], "qps")
 stat([float(x[5]) for x in result], "lat")
