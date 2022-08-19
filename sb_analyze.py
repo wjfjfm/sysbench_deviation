@@ -59,7 +59,6 @@ def plt_distribution(nums, name):
 
 
 if __name__ == "__main__":
-    # TODO
     parser = argparse.ArgumentParser(description='Analyze data according to standard sysbench output')
     parser.add_argument('sysbench_output', type=argparse.FileType('r', encoding='latin-1'),
                         help='the file path of sysbench output')
@@ -67,7 +66,7 @@ if __name__ == "__main__":
                         help='output summary info')
     # parser.add_argument('--csv', '-c', choices=['tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=[],
     #                     help='output raw csv format data')
-    parser.add_argument('--graph', '-g', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['tps'],
+    parser.add_argument('--graph', '-g', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['qps'],
                         help='output time series and data distribution graphs')
     parser.add_argument('--start', '-s', type=int, default=0,
                         help='strip data from (include)')
