@@ -6,7 +6,15 @@
 $ python3 sb_analyze.py sample_sysbench_output.txt
 ```
 
-##Samples:
+## Install
+
+install dependences:
+
+```bash
+$ (sudo) pip3 install numpy plotext argparse
+```
+
+## Samples:
 
 **Default Usage:**
 
@@ -119,15 +127,16 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --summary {all,tps,qps,lat,w,r,o} [{all,tps,qps,lat,w,r,o} ...], -S {all,tp
+  --summary -S {all,tps,qps,lat,w,r,o}
                         output summary info
-  --graph {all,tps,qps,lat,w,r,o} [{all,tps,qps,lat,w,r,o} ...], -g {all,tps,
+  --graph -g {all,tps,qps,lat,w,r,o}
                         output time series and data distribution graphs
-  --start START, -s START
+  --start -s
                         strip data from (include)
-  --end END, -e END     strip data to (not include)
-  --width WIDTH, -W WIDTH
+  --end -e
+                        strip data to (not include)
+  --width -W
                         width of graphs
-  --height HEIGHT, -H HEIGHT
+  --height -H
                         height of graphs
 ```
