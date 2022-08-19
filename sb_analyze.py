@@ -3,6 +3,7 @@ import sys
 import math
 import numpy as np
 import plotext as plt
+import argparse
 
 def stat(nums, name):
     print("[{:^3}] avg: {:<9.1f}std_err(SE): {:<8.1f}std_dev(SD): {:<8.1f}max-min: {:<8.1f}".format(
@@ -58,18 +59,42 @@ def plt_distribution(nums, name):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-         print("Usage: python3 {} sysbench_ouput.txt".format(sys.argv[0]))
-         exit(0)
+    # TODO
+    parser = argparse.ArgumentParser(description='Analyze data according to standard sysbench output')
+    parser.add_argument('sysbench_output', type=argparse.FileType('r', encoding='latin-1'),
+                        help='the file path of sysbench output')
+    parser.add_argument('--summary', '-S', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['all'],
+                        help='output summary info')
+    # parser.add_argument('--csv', '-c', choices=['tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=[],
+    #                     help='output raw csv format data')
+    parser.add_argument('--graph', '-g', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['tps'],
+                        help='output time series and data distribution graphs')
+    parser.add_argument('--start', '-s', type=int, default=0,
+                        help='strip data from (include)')
+    parser.add_argument('--end', '-e', type=int, default=math.inf,
+                        help='strip data to (not include)')
+    parser.add_argument('--width', '-W', type=int, default=80,
+                        help='width of graphs')
+    parser.add_argument('--height', '-H', type=int, default=20,
+                        help='height of graphs')
+    args = parser.parse_args()
 
-    f = open(sys.argv[1], "r")
+    f = args.sysbench_output
     sb_content = f.read()
     pattern = re.compile(r'\[ (\d+)s ] thds: \d+ tps: (\d+\.?\d*) qps: (\d+\.?\d*) \(r/w/o: (\d+\.?\d*)/(\d+\.?\d*)/(\d+\.?\d*)\) lat \(.*\): (\d+\.?\d*).*\n')
 
     # numpy version
     result = np.array(pattern.findall(sb_content), dtype='float')
     count = np.size(result, 0)
+    print("Total Records:", count)
+    if (args.start != 0 or args.end != math.inf):
+        result = result[[x[0] >= args.start and x[0] < args.end for x in result]]
+        count = np.size(result, 0)
+        print("Records after strip:", count)
+
+
     if not count > 0:
+        print("No rocord parsed, exit!")
         exit(0)
 
     time = result[:, 0]
@@ -80,16 +105,34 @@ if __name__ == "__main__":
     w = result[:, 4]
     o = result[:, 5]
 
-    print("Total Records:", count)
-    stat(tps, "tps")
-    stat(qps, "qps")
-    stat(lat, "lat")
-    stat(r, "r")
-    stat(w, "w")
-    stat(o, "o")
+    choices = {
+        'tps': tps,
+        'qps': qps,
+        'lat': lat,
+        'r': r,
+        'w': w,
+        'o': w
+    }
 
-    plt_width = 80
-    plt_height = 20
+    # print summary
+    for i in args.summary:
+        if i == 'all':
+            for [name, data] in choices.items():
+                stat(data, name)
+            break
+        stat(choices[i], i)
 
-    plt_sequential(time, qps, "qps")
-    plt_distribution(qps, "qps")
+    # print graphs
+    plt_width = args.width
+    plt_height = args.height
+
+    for i in args.graph:
+        if i == 'all':
+            for [name, data] in choices.items():
+                plt_sequential(time, data, name)
+                plt_distribution(data, name)
+                stat(data, name)
+            break
+
+        plt_sequential(time, choices[i], i)
+        plt_distribution(choices[i], i)
