@@ -6,8 +6,6 @@
 $ python3 sb_analyze.py sample_sysbench_output.txt
 ```
 
-the *sb_analyze_basic.py* is a simple implementation without any non-origin independence, which can be used by a basic python3 interpreter.
-
 ##Samples:
 
 **Default Usage:**
