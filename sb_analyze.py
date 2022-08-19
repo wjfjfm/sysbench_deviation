@@ -22,9 +22,6 @@ def plt_distribution(nums, name):
     plt.clf()
     plt.clc()
 
-    pizzas = ["Sausage", "Pepperoni", "Mushrooms", "Cheese", "Chicken", "Beef"]
-    percentages = [14, 36, 11, 8, 7, 4]
-
     avg = np.average(nums)
     SD = np.std(nums)
     if SD > 0 :
@@ -65,6 +62,7 @@ if __name__ == "__main__":
                         help='the file path of sysbench output')
     parser.add_argument('--summary', '-S', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['all'],
                         help='output summary info')
+    # TODO wo can use csv data to do more analyze in excel or other platforms
     # parser.add_argument('--csv', '-c', choices=['tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=[],
     #                     help='output raw csv format data')
     parser.add_argument('--graph', '-g', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['qps'],
@@ -87,31 +85,26 @@ if __name__ == "__main__":
     result = np.array(pattern.findall(sb_content), dtype='float')
     count = np.size(result, 0)
     print("Total Records:", count)
+
+    # strip data
     if (args.start != 0 or args.end != math.inf):
         result = result[[x[0] >= args.start and x[0] < args.end for x in result]]
         count = np.size(result, 0)
         print("Records after strip:", count)
 
-
     if not count > 0:
-        print("No rocord parsed, exit!")
+        print("No rocord, exit!")
         exit(0)
 
     time = result[:, 0]
-    tps = result[:, 1]
-    qps = result[:, 2]
-    lat = result[:, 6]
-    r = result[:, 3]
-    w = result[:, 4]
-    o = result[:, 5]
 
     choices = {
-        'tps': tps,
-        'qps': qps,
-        'lat': lat,
-        'r': r,
-        'w': w,
-        'o': w
+        'tps': result[:, 1],
+        'qps': result[:, 2],
+        'lat': result[:, 6],
+        'r':   result[:, 3],
+        'w':   result[:, 4],
+        'o':   result[:, 5],
     }
 
     # print summary
