@@ -71,6 +71,8 @@ if __name__ == "__main__":
                         help='strip data from (include)')
     parser.add_argument('--end', '-e', type=int, default=math.inf,
                         help='strip data to (not include)')
+    parser.add_argument('--tail', '-t', type=int, default=math.inf,
+                        help='strip data from end with max count')
     parser.add_argument('--width', '-W', type=int, default=80,
                         help='width of graphs')
     parser.add_argument('--height', '-H', type=int, default=20,
@@ -87,9 +89,12 @@ if __name__ == "__main__":
     print("Total Records:", count)
 
     # strip data
-    if (args.start != 0 or args.end != math.inf):
+    if (args.start != 0 or args.end != math.inf or args.tail != math.inf):
         result = result[[x[0] >= args.start and x[0] < args.end for x in result]]
         count = np.size(result, 0)
+        if (count > args.tail):
+            result = result[-args.tail:]
+            count = np.size(result, 0)
         print("Records after strip:", count)
 
     if not count > 0:
