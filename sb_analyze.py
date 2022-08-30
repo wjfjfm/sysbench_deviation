@@ -1,4 +1,4 @@
-#! python3
+#! /usr/bin/python3
 import re
 import sys
 import math
@@ -8,7 +8,12 @@ import argparse
 
 def stat(nums, name):
     print("[{:^3}] avg: {:<9.1f}std_err(SE): {:<8.1f}std_dev(SD): {:<8.1f}max-min: {:<8.1f}".format(
-        name, np.average(nums), np.std(nums) / np.sqrt(count), np.std(nums), np.max(nums) - np.min(nums)));
+        name, np.average(nums), np.std(nums) / np.sqrt(count), np.std(nums), np.max(nums) - np.min(nums)))
+
+def total(nums, name):
+    sum = np.sum(nums)
+    print("Total {:^3} x time_interval: {:<9.1f}".format(
+        name, sum * interval))
 
 def plt_sequential(time, nums, name):
     plt.clf()
@@ -57,15 +62,16 @@ def plt_distribution(nums, name):
 
 
 if __name__ == "__main__":
+    choices=['tps', 'qps', 'lat', 'w', 'r', 'o']
     parser = argparse.ArgumentParser(description='Analyze data according to standard sysbench output')
     parser.add_argument('sysbench_output', type=argparse.FileType('r', encoding='latin-1'),
                         help='the file path of sysbench output')
-    parser.add_argument('--summary', '-S', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['all'],
+    parser.add_argument('--summary', '-S', choices=['all'] + choices , nargs='+', default=['all'],
                         help='output summary info')
     # TODO wo can use csv data to do more analyze in excel or other platforms
     # parser.add_argument('--csv', '-c', choices=['tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=[],
     #                     help='output raw csv format data')
-    parser.add_argument('--graph', '-g', choices=['all', 'tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=['qps'],
+    parser.add_argument('--graph', '-g', choices=['all'] + choices, nargs='+', default=['qps'],
                         help='output time series and data distribution graphs')
     parser.add_argument('--start', '-s', type=int, default=0,
                         help='strip data from (include)')
@@ -101,24 +107,30 @@ if __name__ == "__main__":
         print("No rocord, exit!")
         exit(0)
 
-    time = result[:, 0]
-
-    choices = {
-        'tps': result[:, 1],
-        'qps': result[:, 2],
-        'lat': result[:, 6],
-        'r':   result[:, 3],
-        'w':   result[:, 4],
-        'o':   result[:, 5],
+    data = {
+        'time': result[:, 0],
+        'tps':  result[:, 1],
+        'qps':  result[:, 2],
+        'lat':  result[:, 6],
+        'r':    result[:, 3],
+        'w':    result[:, 4],
+        'o':    result[:, 5],
     }
+    time = data['time']
+    interval = time[1] - time[0] if len(time) > 1 else 1
+
 
     # print summary
     for i in args.summary:
         if i == 'all':
-            for [name, data] in choices.items():
-                stat(data, name)
+            for name in choices:
+                stat(data[name], name)
             break
-        stat(choices[i], i)
+        stat(data[i], i)
+    total(data['tps'], 'tps')
+    total(data['qps'], 'qps')
+
+
 
     # print graphs
     plt_width = args.width
@@ -126,11 +138,10 @@ if __name__ == "__main__":
 
     for i in args.graph:
         if i == 'all':
-            for [name, data] in choices.items():
-                plt_sequential(time, data, name)
-                plt_distribution(data, name)
-                stat(data, name)
+            for name in choices:
+                plt_sequential(time, data[name], name)
+                plt_distribution(data[name], name)
             break
 
-        plt_sequential(time, choices[i], i)
-        plt_distribution(choices[i], i)
+        plt_sequential(time, data[i], i)
+        plt_distribution(data[i], i)
