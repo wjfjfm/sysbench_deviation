@@ -117,6 +117,18 @@ Records after strip: 70
 
 ```
 
+**Work with "watch":**
+
+Use "watch" to monitor real time change of a ongoing sysbench output.
+
+```text
+$ watch -c python3 sb_analyze.py sample_sysbench_output.txt --tail 100
+```
+
+Remember to add `-c` flag to watch, which enable ANSI character used by graph.
+
+`--tail 100` flag used by sb_analyze strip data to keep the last 100 record.
+
 **Other parameters:**
 
 ```text
@@ -135,6 +147,8 @@ optional arguments:
                         strip data from (include)
   --end -e
                         strip data to (not include)
+  --tail
+                        strip data from end with max count
   --width -W
                         width of graphs
   --height -H
