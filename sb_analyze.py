@@ -5,6 +5,7 @@ import math
 import numpy as np
 import plotext as plt
 import argparse
+import csv
 
 def stat(nums, name):
     print("[{:^3}] avg: {:<9.1f}std_err(SE): {:<8.1f}std_dev(SD): {:<8.1f}max-min: {:<8.1f}".format(
@@ -60,6 +61,11 @@ def plt_distribution(nums, name):
     plt.plotsize(plt_width, len(data) + 4) # 4 = (1 for x numerical ticks + 2 for x axes + 1 for title)
     plt.show()
 
+def csv_output(file, name, csv_data):
+    with open(file, "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(name)
+        writer.writerows(zip(*csv_data))
 
 if __name__ == "__main__":
     choices=['tps', 'qps', 'lat', 'w', 'r', 'o']
@@ -69,8 +75,10 @@ if __name__ == "__main__":
     parser.add_argument('--summary', '-S', choices=['all'] + choices , nargs='+', default=['all'],
                         help='output summary info')
     # TODO wo can use csv data to do more analyze in excel or other platforms
-    # parser.add_argument('--csv', '-c', choices=['tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=[],
-    #                     help='output raw csv format data')
+    parser.add_argument('--csv', '-c', choices=['tps', 'qps', 'lat', 'w', 'r', 'o'], nargs='+', default=[],
+                        help='output raw csv format data')
+    parser.add_argument('--csv_file', '-f', type=str, default="data.csv",
+                        help='output csv file path')
     parser.add_argument('--graph', '-g', choices=['all'] + choices, nargs='+', default=['qps'],
                         help='output time series and data distribution graphs')
     parser.add_argument('--start', '-s', type=int, default=0,
@@ -130,8 +138,6 @@ if __name__ == "__main__":
     total(data['tps'], 'tps')
     total(data['qps'], 'qps')
 
-
-
     # print graphs
     plt_width = args.width
     plt_height = args.height
@@ -145,3 +151,15 @@ if __name__ == "__main__":
 
         plt_sequential(time, data[i], i)
         plt_distribution(data[i], i)
+
+    # output csv
+    if len(args.csv) > 0:
+        name = []
+        csv_data = []
+
+        for i in args.csv:
+            name.append(i)
+            csv_data.append(data[i])
+
+        csv_output(args.csv_file, name, csv_data)
+
