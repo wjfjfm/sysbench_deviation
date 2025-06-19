@@ -68,7 +68,7 @@ def csv_output(file, name, csv_data):
         writer.writerows(zip(*csv_data))
 
 if __name__ == "__main__":
-    choices=['tps', 'qps', 'lat', 'w', 'r', 'o']
+    choices=['tps', 'qps', 'lat', 'w', 'r', 'o', 'err']
     parser = argparse.ArgumentParser(description='Analyze data according to standard sysbench output')
     parser.add_argument('sysbench_output', type=argparse.FileType('r', encoding='latin-1'),
                         help='the file path of sysbench output')
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     f = args.sysbench_output
     sb_content = f.read()
-    pattern = re.compile(r'\[ (\d+)s ] thds: \d+ tps: (\d+\.?\d*) qps: (\d+\.?\d*) \(r/w/o: (\d+\.?\d*)/(\d+\.?\d*)/(\d+\.?\d*)\) lat \(.*\): (\d+\.?\d*).*\n')
+    pattern = re.compile(r'\[ (\d+)s ] thds: \d+ tps: (\d+\.?\d*) qps: (\d+\.?\d*) \(r/w/o: (\d+\.?\d*)/(\d+\.?\d*)/(\d+\.?\d*)\) lat \(.*\): (\d+\.?\d*) err/s: (\d+\.?\d*).*\n')
 
     # numpy version
     result = np.array(pattern.findall(sb_content), dtype='float')
@@ -123,6 +123,7 @@ if __name__ == "__main__":
         'r':    result[:, 3],
         'w':    result[:, 4],
         'o':    result[:, 5],
+        'err':  result[:, 6],
     }
     time = data['time']
     interval = time[1] - time[0] if len(time) > 1 else 1
