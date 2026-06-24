@@ -1,11 +1,15 @@
 #! /usr/bin/python3
 import re
 import sys
+import io
 import math
 import numpy as np
 import plotext as plt
 import argparse
 import csv
+
+if 'utf' not in (sys.stdout.encoding or '').lower():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 def stat(nums, name):
     print("[{:^3}] avg: {:<9.1f}std_err(SE): {:<8.1f}std_dev(SD): {:<8.1f}max-min: {:<8.1f}".format(
@@ -123,8 +127,9 @@ if __name__ == "__main__":
         'r':    result[:, 3],
         'w':    result[:, 4],
         'o':    result[:, 5],
-        'err':  result[:, 6],
+        'err':  result[:, 7],
     }
+
     time = data['time']
     interval = time[1] - time[0] if len(time) > 1 else 1
 
@@ -163,4 +168,3 @@ if __name__ == "__main__":
             csv_data.append(data[i])
 
         csv_output(args.csv_file, name, csv_data)
-
